@@ -114,18 +114,61 @@ int main( void )
     modem_response_code = lr1110_modem_set_region( &lr1110, LORAWAN_REGION_USED );
 
     modem_response_code = lr1110_modem_test_mode_start( &lr1110 );
-#if( TX_MODULATED )
-    modem_response_code = lr1110_modem_test_tx_cont( &lr1110, 902300000, 22, LR1110_MODEM_TST_MODE_SF7,
-                                                     LR1110_MODEM_TST_MODE_125_KHZ, LR1110_MODEM_TST_MODE_4_5, 51
-                                                     );
-#else
-    modem_response_code = lr1110_modem_test_tx_cw( &lr1110, 902300000, 22 );
-#endif
-
-    while( 1 )
+    
+    #if 1
     {
-        lr1110_modem_event_process( &lr1110 );
+        leds_blink(LED_ALL_MASK, 100, 255, true);
+        
+        for (int j = 0; j < 10;)
+        {
+            uint32_t frequencyMin = 915000000 + 250000;
+            uint32_t frequencyMax = 928000000 - 250000;
+            int8_t tx_powerMin = 12;
+            int8_t tx_powerMax = 22;
+            
+            static uint32_t frequency = 915000000 + 500000;
+            static int8_t tx_power = 12;
+            
+            lr1110_modem_test_tx_single(&lr1110, frequency, tx_power, LR1110_MODEM_TST_MODE_SF7, LR1110_MODEM_TST_MODE_500_KHZ, LR1110_MODEM_TST_MODE_4_5, 0);
+            
+            HAL_Delay(7);
+            
+            tx_power += 1;
+            if (tx_power > tx_powerMax)
+            {
+                tx_power = tx_powerMin;
+                
+                frequency += 500000;
+                if (frequency > frequencyMax)
+                {
+                    frequency = frequencyMin;
+                    j++;
+                }
+            }
+        }
+        while (1);
     }
+    #else
+    {
+        
+        //#define TX_FREQ_HZ 902300000
+        #define TX_FREQ_HZ 923000000
+        #define TX_POW_DBM 18
+        
+        #if( TX_MODULATED )
+        modem_response_code = lr1110_modem_test_tx_cont( &lr1110, TX_FREQ_HZ, TX_POW_DBM, LR1110_MODEM_TST_MODE_SF7,
+                                                         LR1110_MODEM_TST_MODE_125_KHZ, LR1110_MODEM_TST_MODE_4_5, 51
+                                                         );
+        #else
+        modem_response_code = lr1110_modem_test_tx_cw( &lr1110, TX_FREQ_HZ, TX_POW_DBM );
+        #endif
+
+        while( 1 )
+        {
+            lr1110_modem_event_process( &lr1110 );
+        }
+    }
+    #endif
 }
 
 /*
