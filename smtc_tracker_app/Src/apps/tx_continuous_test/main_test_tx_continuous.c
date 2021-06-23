@@ -117,9 +117,11 @@ int main( void )
     
     #if 1
     {
-        leds_blink(LED_ALL_MASK, 100, 255, true);
+        //leds_blink(LED_ALL_MASK, 100, 255, true);
+        leds_blink(LED_ALL_MASK, 10, 255, true);
         
-        for (int j = 0; j < 10;)
+        //for (int j = 0; j < 10;)
+        for (int j = 0; j < 1000000;)
         {
             uint32_t frequencyMin = 915000000 + 250000;
             uint32_t frequencyMax = 928000000 - 250000;
